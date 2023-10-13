@@ -1,5 +1,6 @@
 schema {
     query: Query
+    mutation: Mutation
 }
 
 directive @assertFalse on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
@@ -36,8 +37,6 @@ directive @positiveOrZero on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @decimalMax(inclusive: Boolean = true, value: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
-directive @javaType(name: String!) on SCALAR
-
 directive @size(max: Int = 2147483647, min: Int = 0) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @null on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
@@ -50,14 +49,178 @@ directive @notEmpty on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 directive @decimalMin(inclusive: Boolean = true, value: String!) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
+directive @javaType(name: String!) on SCALAR | OBJECT | INPUT_OBJECT
+
 "Query root"
 type Query {
     userInfo: UserInfo
     userPermissions: [String]
+    customer(id: ID!): Customer!
+    customerList(filter: CustomerFilterInput, sort: [CustomerOrderByInput], page: OffsetPageInput): CustomerResultPage!
+    order(id: ID!): OrderDto!
+    orderList(filter: OrderFilterInput, sort: [OrderOrderByInput], page: OffsetPageInput): OrderDtoResultPage!
+    product(id: ID!): Product!
+    productList(filter: ProductFilterInput, sort: [ProductOrderByInput], page: OffsetPageInput): ProductResultPage!
+    orderLine(id: ID!): OrderLineDto!
+    orderLineList(filter: OrderLineFilterInput, sort: [OrderLineOrderByInput]): [OrderLineDto]!
+}
+
+type Mutation {
+    deleteCustomer(id: ID!): Void
+    deleteOrder(id: ID!): Void
+    deleteProduct(id: ID!): Void
+    updateCustomer(input: CustomerInput!): Customer!
+    updateOrder(input: OrderDtoInput!): OrderDto!
+    updateProduct(input: ProductInput!): Product!
+    deleteOrderLine(id: ID!): Void
+    updateOrderLine(input: OrderLineDtoInput!): OrderLineDto!
 }
 
 type UserInfo {
     username: String
+}
+
+type Customer {
+    email: String
+    id: ID
+    name: String!
+}
+
+type CustomerResultPage {
+    content: [Customer]
+    totalElements: Long!
+}
+
+type OrderDto {
+    amount: BigDecimal
+    customer: Customer
+    date: Date!
+    id: ID
+    number: String
+}
+
+type OrderDtoResultPage {
+    content: [OrderDto]
+    totalElements: Long!
+}
+
+type Product {
+    id: ID
+    name: String!
+    price: BigDecimal!
+    special: Boolean
+}
+
+type ProductResultPage {
+    content: [Product]
+    totalElements: Long!
+}
+
+type OrderLineDto {
+    id: ID
+    order: OrderDto
+    product: Product
+    quantity: BigDecimal
+}
+
+enum SortDirection {
+    ASC
+    DESC
+}
+
+enum CustomerOrderByProperty {
+    EMAIL
+    ID
+    NAME
+}
+
+enum OrderOrderByProperty {
+    DATE
+    NUMBER
+}
+
+enum ProductOrderByProperty {
+    NAME
+    PRICE
+}
+
+enum OrderLineOrderByProperty {
+    PRODUCT_NAME
+    PRODUCT_PRICE
+}
+
+input CustomerFilterInput {
+    email: String
+    name: String
+}
+
+input OffsetPageInput {
+    number: Int!
+    size: Int!
+}
+
+input OrderFilterInput {
+    customerName: String
+    dateMin: Date
+    number: String
+}
+
+input ProductFilterInput {
+    name: String
+    priceMax: BigDecimal
+    priceMin: BigDecimal
+}
+
+input CustomerInput {
+    email: String @email(regexp: ".*")
+    id: ID
+    name: String!
+}
+
+input OrderDtoInput {
+    amount: BigDecimal
+    customer: CustomerInput
+    date: Date!
+    id: ID
+    number: String
+}
+
+input ProductInput {
+    id: ID
+    name: String!
+    price: BigDecimal!
+    special: Boolean
+}
+
+input CustomerOrderByInput {
+    direction: SortDirection
+    property: CustomerOrderByProperty
+}
+
+input OrderOrderByInput {
+    direction: SortDirection
+    property: OrderOrderByProperty
+}
+
+input ProductOrderByInput {
+    direction: SortDirection
+    property: ProductOrderByProperty
+}
+
+input OrderLineFilterInput {
+    orderId: Long
+}
+
+input OrderLineDtoInput {
+    id: ID
+    order: OrderDtoInput
+    product: ProductInput
+    quantity: BigDecimal
+}
+
+input OrderLineOrderByInput {
+    direction: SortDirection
+    property: OrderLineOrderByProperty
 }
 
 scalar BigDecimal @javaType(name: "java.math.BigDecimal")
