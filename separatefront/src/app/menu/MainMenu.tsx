@@ -4,6 +4,7 @@ export const MainMenu = () => {
   return (
     <Menu>
       <Menu.DashboardItem />
+      <Menu.ResourceItem name="Product" />
     </Menu>
   );
 };

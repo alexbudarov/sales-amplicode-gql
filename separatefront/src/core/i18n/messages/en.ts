@@ -4,10 +4,22 @@ import { mergeMessages } from "./mergeMessages";
 
 const messages: TranslationMessages = {
   ...englishMessages,
-  resources: {},
-  amplicode: {
-    not_set: "Not set",
+
+  resources: {
+    Product: {
+      name: "Product |||| Products",
+
+      fields: {
+        name: "Name",
+        price: "Price",
+        special: "Special"
+      }
+    }
   },
+
+  amplicode: {
+    not_set: "Not set"
+  }
 };
 
 export const en = mergeMessages(
